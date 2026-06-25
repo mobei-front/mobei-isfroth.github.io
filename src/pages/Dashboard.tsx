@@ -171,7 +171,7 @@ export default function Dashboard() {
             <div className="glass-card p-3 sm:p-4 md:p-5 glow-border h-full flex flex-col items-center justify-center">
               <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 relative">
                 <img
-                  src="/logo.png"
+                  src={`${import.meta.env.BASE_URL}logo.png`}
                   alt="Logo"
                   className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(0,240,255,0.6)]"
                 />
