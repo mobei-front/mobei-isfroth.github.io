@@ -1,8 +1,8 @@
-import { Github, Wrench, BookOpen } from 'lucide-react';
+import { Github, Wrench, BookOpen, ExternalLink } from 'lucide-react';
 
 const links = [
-  { name: '个人博客', icon: BookOpen, url: '#', color: 'from-blue-500 to-cyan-500' },
-  { name: 'GitHub', icon: Github, url: '#', color: 'from-gray-500 to-gray-700' },
+  { name: '个人博客', icon: BookOpen, url: 'https://mobei-isfroth.github.io/KnowledgeBase/', color: 'from-blue-500 to-cyan-500' },
+  { name: 'GitHub', icon: Github, url: 'https://github.com/mobei-isfroth', color: 'from-gray-500 to-gray-700' },
   { name: '工具箱', icon: Wrench, url: '#', color: 'from-purple-500 to-pink-500' },
 ];
 
@@ -19,6 +19,8 @@ export default function QuickLinks() {
           <a
             key={link.name}
             href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
             className="group flex flex-col items-center gap-1 sm:gap-1.5 md:gap-2 p-1.5 sm:p-2 md:p-3 rounded-lg hover:bg-white/5 transition-all duration-300"
           >
             <div className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br ${link.color} flex items-center justify-center group-hover:scale-110 transition-transform shadow-md`}>
@@ -27,6 +29,7 @@ export default function QuickLinks() {
             <span className="text-[10px] sm:text-xs md:text-sm text-midnight-100 group-hover:text-white transition-colors font-serif">
               {link.name}
             </span>
+            <ExternalLink className="w-2.5 h-2.5 text-midnight-400 group-hover:text-cyan-glow opacity-0 group-hover:opacity-100 transition-all" />
           </a>
         ))}
       </div>

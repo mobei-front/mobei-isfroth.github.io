@@ -35,6 +35,8 @@ jobs:
       - name: 构建
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
+          VITE_WEATHER_APPID: ${{ secrets.WEATHER_APPID }}
+          VITE_WEATHER_APPSECRET: ${{ secrets.WEATHER_APPSECRET }}
         run: pnpm build
 
       - name: 上传构建产物

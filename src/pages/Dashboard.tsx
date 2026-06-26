@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { RefreshCw, Flame, Info } from 'lucide-react';
-import RainEffect from '@/components/rain/RainEffect';
+import WeatherEffect from '@/components/weather/WeatherEffect';
 import DateTimeDisplay from '@/components/datetime/DateTimeDisplay';
 import MusicPlayer from '@/components/music/MusicPlayer';
 import DailyQuote from '@/components/quote/DailyQuote';
 import WeatherCard from '@/components/weather/WeatherCard';
 import QuickLinks from '@/components/links/QuickLinks';
 import HistoryToday from '@/components/history/HistoryToday';
+import { useWeatherStore } from '@/store/weather';
 
 interface HotItem {
   title: string;
@@ -25,7 +26,12 @@ export default function Dashboard() {
   const [hotLoading, setHotLoading] = useState(true);
   const [showApiNotice, setShowApiNotice] = useState(false);
 
-  // 收集页面上的玻璃卡片，传给雨滴效果做碰撞检测
+  const { fetchWeather } = useWeatherStore();
+
+  useEffect(() => {
+    fetchWeather();
+  }, [fetchWeather]);
+
   useEffect(() => {
     if (containerRef.current) {
       const cards = containerRef.current.querySelectorAll('.glass-card');
@@ -33,7 +39,6 @@ export default function Dashboard() {
     }
   }, []);
 
-  // 自定义光标跟随
   useEffect(() => {
     const cursor = document.getElementById('custom-cursor');
     if (!cursor) return;
@@ -61,13 +66,30 @@ export default function Dashboard() {
     };
   }, []);
 
-  // 欢迎气泡3秒后自动消失
   useEffect(() => {
     const timer = setTimeout(() => setShowWelcome(false), 3000);
     return () => clearTimeout(timer);
   }, []);
 
-  // 拉随机壁纸
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      const ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.left = e.clientX + 'px';
+      ripple.style.top = e.clientY + 'px';
+      document.body.appendChild(ripple);
+
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    };
+
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('click', handleClick);
+    };
+  }, []);
+
   useEffect(() => {
     const fetchWallpaper = async () => {
       try {
@@ -84,7 +106,6 @@ export default function Dashboard() {
     fetchWallpaper();
   }, []);
 
-  // 拉B站热搜，支持本地缓存半小时
   const fetchHotList = async (force = false) => {
     if (!force) {
       try {
@@ -129,12 +150,10 @@ export default function Dashboard() {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full overflow-hidden bg-midnight-950 cursor-custom"
+      className="relative w-full h-full overflow-hidden bg-midnight-950"
     >
-      {/* 自定义光标 */}
       <div id="custom-cursor" className="custom-cursor" />
 
-      {/* 壁纸背景 */}
       {wallpaper && (
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 animate-fade-in"
@@ -147,26 +166,21 @@ export default function Dashboard() {
         <div className="absolute inset-0 bg-gradient-to-br from-midnight-950 via-midnight-900 to-midnight-950" />
       )}
 
-      {/* 背景光晕 */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-cyan-glow/5 rounded-full blur-[80px] animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-blue-500/5 rounded-full blur-[60px] animate-pulse" style={{ animationDelay: '1s' }} />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-cyan-glow/3 rounded-full blur-[100px]" />
       </div>
 
-      {/* 网格线底纹 */}
       <div className="absolute inset-0 opacity-[0.015]" style={{
         backgroundImage: 'linear-gradient(rgba(0, 240, 255, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.2) 1px, transparent 1px)',
         backgroundSize: '40px 40px',
       }} />
 
-      {/* 雨滴效果 */}
-      <RainEffect interactiveElements={interactiveElements} />
+      <WeatherEffect interactiveElements={interactiveElements} />
 
-      {/* 主内容区 */}
       <main className="relative z-20 w-full h-full flex flex-col px-3 sm:px-6 md:px-10 lg:px-16 xl:px-24 2xl:px-32 pt-10 sm:pt-12 md:pt-14 lg:pt-16 xl:pt-20 pb-4 sm:pb-5 md:pb-6">
         <div className="max-w-[1400px] xl:max-w-[1600px] 2xl:max-w-[1800px] mx-auto flex-1 w-full grid grid-cols-12 grid-rows-2 gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 min-h-0">
-          {/* logo + 站点名 */}
           <div className="col-span-6 md:col-span-6 lg:col-span-3 animate-fade-in" style={{ animationDelay: '0.1s' }}>
             <div className="glass-card p-3 sm:p-4 md:p-5 glow-border h-full flex flex-col items-center justify-center">
               <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 relative">
@@ -192,7 +206,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* 时间 + 天气 */}
           <div className="col-span-6 md:col-span-6 lg:col-span-3 flex flex-col gap-1.5 sm:gap-2 md:gap-3 lg:gap-4">
             <div className="flex-1 min-h-0 animate-fade-in" style={{ animationDelay: '0.2s' }}>
               <DateTimeDisplay compact />
@@ -202,12 +215,10 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* 音乐播放器 */}
           <div className="col-span-6 md:col-span-6 lg:col-span-3 animate-fade-in" style={{ animationDelay: '0.3s' }}>
             <MusicPlayer />
           </div>
 
-          {/* B站热搜 */}
           <div className="col-span-12 md:col-span-12 lg:col-span-3 animate-fade-in" style={{ animationDelay: '0.4s' }}>
             <div className="glass-card p-3 sm:p-4 md:p-5 glow-border h-full flex flex-col min-h-0">
               <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4 flex-shrink-0">
@@ -259,23 +270,19 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* 每日一言 */}
           <div className="col-span-12 md:col-span-12 lg:col-span-6 animate-fade-in" style={{ animationDelay: '0.5s' }}>
             <DailyQuote />
           </div>
 
-          {/* 历史上的今天 */}
           <div className="col-span-6 md:col-span-6 lg:col-span-3 animate-fade-in" style={{ animationDelay: '0.55s' }}>
             <HistoryToday />
           </div>
 
-          {/* 快捷导航 */}
           <div className="col-span-6 md:col-span-6 lg:col-span-3 animate-fade-in" style={{ animationDelay: '0.6s' }}>
             <QuickLinks />
           </div>
         </div>
 
-        {/* 底部信息栏 */}
         <footer className="flex-shrink-0 mt-2 sm:mt-3 md:mt-4">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-midnight-400/70">
             <span className="text-sm sm:text-base tracking-wider">© 2026 mobei · 雨夜</span>
@@ -291,16 +298,15 @@ export default function Dashboard() {
 
           {showApiNotice && (
             <div className="mt-2 p-2 sm:p-3 glass-card text-center text-[10px] sm:text-xs text-midnight-300/70 max-w-xl mx-auto animate-fade-in">
-              本站所有接口数据均来自 xxapi.cn 等网络公开免费 API，仅供学习交流使用，数据版权归原平台所有。
+              天气数据来自 yiketianqi.com，音乐数据来自酷我音乐API，每日一言来自爱情公寓接口，B站热搜来自公开API。仅供学习交流使用。
             </div>
           )}
         </footer>
       </main>
 
-      {/* 欢迎气泡 */}
       {showWelcome && (
         <div
-          className="fixed top-10 sm:top-12 right-4 sm:right-6 z-50 animate-slide-up cursor-pointer"
+          className="fixed top-4 sm:top-5 right-4 sm:right-6 z-50 animate-slide-up cursor-pointer"
           onClick={() => setShowWelcome(false)}
         >
           <div className="glass-card p-3 sm:p-4 md:p-5 glow-border relative">
